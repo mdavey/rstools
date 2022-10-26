@@ -55,7 +55,7 @@
 #define MAX_EXPECTED_CHUNKS 1600  /* reeds about 300k sized files */
 
 /* just a "large" random string because it's so unlikely to be in the data by chance - better idea? */
-#define RSBEP_MAGIC_NUM "InÇÊ˜8˜¬R7ö¿ç”S¡"
+#define RSBEP_MAGIC_NUM "Inï¿½Ê˜8ï¿½ï¿½R7ï¿½ï¿½ï¿½Sï¿½"
 
 #define PHDR_LEN  54    /* (40+strlen(RSBEP_MAGIC_NUM)) //maximum expected len of header line... */
 
@@ -240,7 +240,7 @@ int main(int argc,char *argv[])
   FILE *fpin, *fpout; 
   long got;
   int coded_file_size ;
-  char coded_file_ext[4] ;
+  char coded_file_ext[5] = {0};
   char orgfilename[100];
   char *p ;
 
@@ -348,7 +348,7 @@ int main(int argc,char *argv[])
   }
   coded_file_size = bep_size*RS_DSIZE - (int)tr_buf[0];
   printf("coded_file_size is %d \n", coded_file_size);
-  strcpy(coded_file_ext, tr_buf+3);
+  strncpy(coded_file_ext, tr_buf+3, 4);
   strcpy(orgfilename, argv[1]);
   p = strtok(orgfilename, ".");
   strcat(orgfilename, ".");
@@ -363,5 +363,7 @@ int main(int argc,char *argv[])
   }
   fwrite(tr_buf+7,1, coded_file_size, fpout);
   fclose(fpout);
+  fclose(fpin);
+  unlink("tmpout.dat");
   return 0;
 }

@@ -54,7 +54,7 @@
 #define MAX_FILE_SIZE 20000000 
 
 //just a "large" random string because it's so unlikely to be in the data by chance - better idea?
-#define RSBEP_MAGIC_NUM "InÇÊ˜8˜¬R7ö¿ç”S¡"
+#define RSBEP_MAGIC_NUM "Inï¿½Ê˜8ï¿½ï¿½R7ï¿½ï¿½ï¿½Sï¿½"
 
 #define PHDR_LEN  54    // (40+strlen(RSBEP_MAGIC_NUM)) //maximum expected len of header line...
 
@@ -260,7 +260,7 @@ int main(int argc,char *argv[])
   int chunks, got ;
   char *p ;
   char orgfilename[50];
-  char orgfile_extension [4];
+  char orgfile_extension [5] = {0};
   char revfilename[50];
   char outputfilename[50];
   int posdot;
@@ -296,11 +296,16 @@ int main(int argc,char *argv[])
    //get the buffers we need (here we know how large):
    ec_buf=malloc(rs_bsize*bep_size*sizeof(dtype));  
    bk_buf=malloc(rs_bsize*bep_size*sizeof(dtype));  
+
    if(ec_buf==NULL ||  bk_buf==NULL)
    {
               fprintf(stderr,"%s: out of memory, bailing.\n",argv[0]);
               exit(-1);
    }
+
+   memset(ec_buf, 0x00, rs_bsize*bep_size*sizeof(dtype));
+   memset(bk_buf, 0x00, rs_bsize*bep_size*sizeof(dtype));
+
    fseek(fpin, 0L, SEEK_SET);   /* reset to start of file */
    /* find extension of original file */
    strcpy(revfilename, argv[1]);
@@ -308,7 +313,7 @@ int main(int argc,char *argv[])
    /* strrev(revfilename); */
  //  printf("rev filename is %s \n", revfilename); 
    p=strtok(revfilename, ".");
-   strcpy(orgfile_extension, p);
+   strncpy(orgfile_extension, p, 4);
    revstring(orgfile_extension);
    extlength = strlen(orgfile_extension) ;
 //  printf(" filename ext is %s\n", orgfile_extension);
@@ -323,7 +328,6 @@ int main(int argc,char *argv[])
 	  printf("Cannot open %s for output \n", outputfilename);
 	  exit(-1);
   }
-   /* write header for .rs2 file */
 
    databyte = (unsigned char) ( rs_dsize - ( got % rs_dsize)) ; /* surplus in filelength */
    ec_buf[0]= databyte;
@@ -332,7 +336,7 @@ int main(int argc,char *argv[])
    databyte = (unsigned char) (chunks/256) ;
    ec_buf[2]= databyte ;
 
-   strncpy(ec_buf+3, orgfile_extension, 3);   /* max length ext is 3 */
+   strncpy(ec_buf+3, orgfile_extension, 4);   /* max length ext is 3 */ // Ha!
    got = fread(ec_buf+7, 1 , rs_dsize-7, fpin);
    if (got != (rs_dsize-7))
    {

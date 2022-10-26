@@ -54,7 +54,7 @@
 #define MAX_EXPECTED_CHUNKS 1600  /* reeds about 300k sized files */
 
 /* just a "large" random string because it's so unlikely to be in the data by chance - better idea? */
-#define RSBEP_MAGIC_NUM "InÇÊ˜8˜¬R7ö¿ç”S¡"
+#define RSBEP_MAGIC_NUM "Inï¿½Ê˜8ï¿½ï¿½R7ï¿½ï¿½ï¿½Sï¿½"
 
 #define PHDR_LEN  54    /* (40+strlen(RSBEP_MAGIC_NUM)) //maximum expected len of header line... */
 
@@ -239,7 +239,7 @@ int main(int argc,char *argv[])
   FILE *fpin, *fpout; 
   long got;
   int coded_file_size ;
-  char coded_file_ext[4] ;
+  char coded_file_ext[5] = {0};
   char orgfilename[100];
   char *p ;
 
@@ -339,7 +339,7 @@ int main(int argc,char *argv[])
   /* now read the tmpout data again */
 
   got =fread(tr_buf,1, RS_BSIZE*MAX_EXPECTED_CHUNKS , fpin);
-  printf("after fread tmpout again  file ext is %s \n", tr_buf+3);
+  // printf("after fread tmpout again  file ext is %s \n", tr_buf+3);
   
   if (bep_size != ((int) tr_buf[1] + ((int) tr_buf[2])*256 ))
   {
@@ -348,7 +348,7 @@ int main(int argc,char *argv[])
 		  exit(-1);
   }
   coded_file_size = bep_size*RS_DSIZE - (int)tr_buf[0];
-  strcpy(coded_file_ext, tr_buf+3);
+  strncpy(coded_file_ext, tr_buf+3, 4);
   strcpy(orgfilename, argv[1]);
   p = strtok(orgfilename, ".");
   printf(" na p = strtok \n");
@@ -365,5 +365,7 @@ int main(int argc,char *argv[])
   }
   fwrite(tr_buf+7,1, coded_file_size, fpout);
   fclose(fpout);
+  fclose(fpin);
+  unlink("tmpout.dat");
   return 0;
 }
